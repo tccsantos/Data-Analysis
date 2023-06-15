@@ -19,19 +19,22 @@ def read_options():
         "-i", "--input", help="CSV input File", required=True, default=""
     )
     parser.add_argument(
+        "-t", "--type", help="Output file type (CSV or GML)", required=True, default=""
+    )
+    parser.add_argument(
         "-o", "--output", help="Output file name", required=True, default=""
     )
 
     argument = parser.parse_args()
 
-    if argument.input and argument.output:
+    if argument.input and argument.output and argument.type:
         status = True
 
     if not status:
         print("Maybe you want to use -h for help")
         status = False
 
-    return {"success": status, "input": argument.input, "output": argument.output}
+    return {"success": status, "input": argument.input, "type": argument.type, "output": argument.output}
 
 
 def contnoh(lista):
@@ -50,29 +53,54 @@ def contnoh(lista):
     return final
 
 
-def escritagml(noh, aresta, output):
-    with codecs.open(output + "_citacoes.gml", 'w', encoding='utf-8') as arquivo:
-        arquivo.write("graph\n[\n")
-        for ind in range(len(noh)):
-            node = noh[ind]
-            arquivo.write(f'\tnode\n\t[\n\t\tid {str(node)}\n\t\tlabel "{str(node)}"\n\t]\n')
-        for i in range(len(aresta)):
-            source = aresta[i][0][0]
-            target = aresta[i][0][1]
-            weight = aresta[i][1]
-            label = f'aresta {str(source)} para {str(target)}'
-            arquivo.write(f'\tedge\n\t[\n\t\tsource {str(source)}\n\t\ttarget {str(target)}\n\t\tlabel "{str(label)}"\n\t\tweight {str(weight)}\n\t]\n')
-        arquivo.write("]")
+def escrita(aresta, output, file):
+    if file:
+        with codecs.open(output + "_citacoes.csv", 'w', encoding='utf-8') as arquivo:
+            arquivo.write('"source","target","weight"\n')
+            for a in range(len(aresta)):
+                user = aresta[a][0][0]
+                citado = aresta[a][0][1]
+                peso = aresta[a][1]
+                arquivo.write(f'{str(user)},{str(citado)},{int(peso)}\n')
+    else:
+        noh = contnoh(oficial)
+        with codecs.open(output + "_citacoes.gml", 'w', encoding='utf-8') as arquivo:
+            arquivo.write("graph\n[\n")
+            for ind in range(len(noh)):
+                node = noh[ind]
+                arquivo.write(f'\tnode\n\t[\n\t\tid {str(node)}\n\t\tlabel "{str(node)}"\n\t]\n')
+            for i in range(len(aresta)):
+                source = aresta[i][0][0]
+                target = aresta[i][0][1]
+                weight = aresta[i][1]
+                label = f'aresta {str(source)} para {str(target)}'
+                arquivo.write(f'\tedge\n\t[\n\t\tsource {str(source)}\n\t\ttarget {str(target)}\n\t\tlabel "{str(label)}"\n\t\tweight {str(weight)}\n\t]\n')
+            arquivo.write("]")
 
 
-def escritacsv(principal, output):
-    with codecs.open(output + "_citacoes.csv", 'w', encoding='utf-8') as arquivo:
-        arquivo.write('"source","target","weight"\n')
-        for a in range(len(principal)):
-            user = principal[a][0][0]
-            citado = principal[a][0][1]
-            peso = principal[a][1]
-            arquivo.write(f'{str(user)},{str(citado)},{int(peso)}\n')
+# def escritagml(noh, aresta, output):
+#     with codecs.open(output + "_citacoes.gml", 'w', encoding='utf-8') as arquivo:
+#         arquivo.write("graph\n[\n")
+#         for ind in range(len(noh)):
+#             node = noh[ind]
+#             arquivo.write(f'\tnode\n\t[\n\t\tid {str(node)}\n\t\tlabel "{str(node)}"\n\t]\n')
+#         for i in range(len(aresta)):
+#             source = aresta[i][0][0]
+#             target = aresta[i][0][1]
+#             weight = aresta[i][1]
+#             label = f'aresta {str(source)} para {str(target)}'
+#             arquivo.write(f'\tedge\n\t[\n\t\tsource {str(source)}\n\t\ttarget {str(target)}\n\t\tlabel "{str(label)}"\n\t\tweight {str(weight)}\n\t]\n')
+#         arquivo.write("]")
+
+
+# def escritacsv(principal, output):
+#     with codecs.open(output + "_citacoes.csv", 'w', encoding='utf-8') as arquivo:
+#         arquivo.write('"source","target","weight"\n')
+#         for a in range(len(principal)):
+#             user = principal[a][0][0]
+#             citado = principal[a][0][1]
+#             peso = principal[a][1]
+#             arquivo.write(f'{str(user)},{str(citado)},{int(peso)}\n')
 
 
 def procura(comp, redex, user, tokens):
@@ -119,6 +147,8 @@ oficial = []
 for ind in range(len(principal)):
     if principal[ind][1] > 5:
         oficial.append(principal[ind])
-#escritacsv(oficial, result.get("output"))
-nos = contnoh(oficial)
-escritagml(nos, oficial, result.get("output"))
+file = result.get("type").lower()
+if file == "gml":
+    escrita(oficial, result.get("output"), 0)
+else:
+    escrita(oficial, result.get("output"), 1)
