@@ -78,31 +78,6 @@ def escrita(aresta, output, file):
             arquivo.write("]")
 
 
-# def escritagml(noh, aresta, output):
-#     with codecs.open(output + "_citacoes.gml", 'w', encoding='utf-8') as arquivo:
-#         arquivo.write("graph\n[\n")
-#         for ind in range(len(noh)):
-#             node = noh[ind]
-#             arquivo.write(f'\tnode\n\t[\n\t\tid {str(node)}\n\t\tlabel "{str(node)}"\n\t]\n')
-#         for i in range(len(aresta)):
-#             source = aresta[i][0][0]
-#             target = aresta[i][0][1]
-#             weight = aresta[i][1]
-#             label = f'aresta {str(source)} para {str(target)}'
-#             arquivo.write(f'\tedge\n\t[\n\t\tsource {str(source)}\n\t\ttarget {str(target)}\n\t\tlabel "{str(label)}"\n\t\tweight {str(weight)}\n\t]\n')
-#         arquivo.write("]")
-
-
-# def escritacsv(principal, output):
-#     with codecs.open(output + "_citacoes.csv", 'w', encoding='utf-8') as arquivo:
-#         arquivo.write('"source","target","weight"\n')
-#         for a in range(len(principal)):
-#             user = principal[a][0][0]
-#             citado = principal[a][0][1]
-#             peso = principal[a][1]
-#             arquivo.write(f'{str(user)},{str(citado)},{int(peso)}\n')
-
-
 def procura(comp, redex, user, tokens):
     suporte = comp.search(tokens)
     tup = redex.sub("", str(suporte.group()))

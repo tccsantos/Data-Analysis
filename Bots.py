@@ -121,8 +121,7 @@ def junction(mix, amount):
             nome = mix[ind][1]
             for ind2 in range(len(amount)):
                 if nome == amount[ind2][0]:
-                    ajuda = [amount[ind2][1], mix[ind][0], nome]
-                    suporte.append(ajuda)
+                    suporte.append([amount[ind2][1], mix[ind][0], nome])
                     break
         return suporte
     else:
