@@ -24,17 +24,20 @@ def read_options():
     parser.add_argument(
         "-o", "--output", help="Output file name", required=True, default=""
     )
+    parser.add_argument(
+        "-w", "--weight", help="Weight limit", required=True, default=""
+    )
 
     argument = parser.parse_args()
 
-    if argument.input and argument.output and argument.type:
+    if argument.input and argument.output and argument.type and argument.weight:
         status = True
 
     if not status:
         print("Maybe you want to use -h for help")
         status = False
 
-    return {"success": status, "input": argument.input, "type": argument.type, "output": argument.output}
+    return {"success": status, "input": argument.input, "type": argument.type, "output": argument.output, "weight": argument.weight}
 
 
 def contnoh(lista):
@@ -120,7 +123,7 @@ secundario = analise(result.get("input"))
 principal = contagem(secundario)
 oficial = []
 for ind in range(len(principal)):
-    if principal[ind][1] > 5:
+    if principal[ind][1] >= int(result.get("weight")):
         oficial.append(principal[ind])
 file = result.get("type").lower()
 if file == "gml":

@@ -1,6 +1,5 @@
 import pandas as pd
 import codecs
-from csv import reader
 import argparse
 import datetime as dt
 import re
@@ -61,7 +60,7 @@ def analise(link, resultado, df):
 	print('df read')
 	#busca os urls no dataframe
 	for ind in df.index:
-		if ind%500 == 0:
+		if ind%100000 == 0:
 			print(ind)
 		words = str(df['expanded_url'][ind])
 		cit = True
@@ -75,6 +74,7 @@ def analise(link, resultado, df):
 			amostra =  words[sup[0]:]
 			amostra = amostra.split()
 			url = amostra[0].split(sep=',')[0]
+			words = redex.sub("", words, 1)
 			if filtro.search(url) != None:
 				continue
 
@@ -89,7 +89,6 @@ def analise(link, resultado, df):
 				resultado[url][0] = dia
 			if (today[1] - ref).days < (dia - ref).days:
 				resultado[url][1] = dia
-			words = redex.sub("", words, 1)
 	return resultado
 
 def escrita(resultado, outputfile, ref):
@@ -105,27 +104,21 @@ def escrita(resultado, outputfile, ref):
 	domains = {}
 	for key, value in resultado.items():
 		domain = get_domain(key).get("domain")
-		domains[domain] = value
+		if domain:
+			if domains.get(domain):
+				if (value[0] - ref).days < (domains[domain][0] - ref).days:
+					domains[domain][0] = value[0]
+				if (value[1] - ref).days > (domains[domain][1] - ref).days:
+					domains[domain][1] = value[1]
+			else:
+				domains[domain] = value
+
 	resultado = None
-
-	sup = {}
-	for key, value in domains.items():
-		new = sup.get(key)
-		if new:
-			sup[key] = value
-		else:
-			if (new[0] - ref).days > (value[0] - ref).days:
-				sup[key][0] = value[0]
-			if (new[1] - ref).days < (value[1] - ref).days:
-				sup[key][1] = value[1]
-	
-	domains = None
-
 	print('Second start')
 
 	with codecs.open(outputfile + '_domainstime.csv', 'w', encoding='utf8') as arquivo:
-		arquivo.write('"domain","first","duration","last"')
-		for key, value in sup.items():
+		arquivo.write('"domain","first","duration","last"\n')
+		for key, value in domains.items():
 			duration = (value[1] - value[0]).days
 			arquivo.write(f'{str(key)},{str(value[0])},{str(duration)},{str(value[1])}\n')
 		arquivo.close()

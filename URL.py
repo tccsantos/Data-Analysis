@@ -5,13 +5,13 @@ import codecs
 import re
 
 from argparse import RawTextHelpFormatter
-from collections import Counter
+#from collections import Counter
 
 def escrita(outputfile, top):
     with codecs.open(outputfile + "_URL.csv", 'w', encoding='utf-8') as arquivo:
         for a in range(len(top)):
-            suporte = top[a][0]
-            arquivo.write(f'{suporte}\n')
+            suporte = top[a]
+            arquivo.write(f'{str(suporte)}\n')
         arquivo.close()
 
 
@@ -20,7 +20,7 @@ def busca(inputfile):
     redex = re.compile("http")
     urllist = []
     for ind in df.index:
-        text = str(df["text"][ind])
+        text = str(df["expanded_url"][ind])
         cit = True
         while cit:
             suporte = redex.search(text)
@@ -30,7 +30,8 @@ def busca(inputfile):
             sup = suporte.span()
             amostra =  text[sup[0]:]
             amostra = amostra.split()
-            urllist.append(amostra[0])
+            url = amostra[0].split( sep=',')
+            urllist.append(url[0])
             text = redex.sub("", text, 1)
     return urllist
 
@@ -66,5 +67,4 @@ if not result.get("success"):
 outputfile = result.get("output")
 inputfile = result.get("input")
 urllist = busca(inputfile)
-top = Counter(urllist)
-escrita(outputfile, top.most_common())
+escrita(outputfile, urllist)

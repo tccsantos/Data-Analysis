@@ -1,9 +1,6 @@
 import pandas as pd
 import argparse
 import sys
-# import matplotlib.pyplot as plt
-# import numpy as np
-# import re
 
 from argparse import RawTextHelpFormatter
 from collections import Counter
@@ -30,19 +27,11 @@ def read_options():
 
     return {"success": status, "input": argument.input}
 
-def read(input):
-    try:
-        df = pd.read_csv(input)
-        return df
-    except Exception as e:
-        print(e)
-        sys.exit(1)
-
 
 result = read_options()
 if not result.get("success"):
     sys.exit(1)
-df = read(result.get("input"))
+df = pd.read_csv(result.get("input"))
 wordlist = []
 suporte = 0
 for ind in df.index:
@@ -54,17 +43,8 @@ for ind in df.index:
         pass
 c = Counter(wordlist)
 top = c.most_common()
+max_top = 10
 print('Número de Tweets:')
 print(suporte)
 print('Usuários que mais tweetaram:')
 print(top[:10])
-# top = np.array(top)
-# x = top[:,0]
-# y = np.array_str(top[:,1])
-# y = re.sub(r"[]'[]", "", y)
-# y = y.split()
-# for a in y:
-#     a = int(a)
-# print(y)
-
-# #plt.plot()
