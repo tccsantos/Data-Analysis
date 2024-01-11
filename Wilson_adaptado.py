@@ -295,11 +295,11 @@ def main():
                 # Unshorten the url
                 long_url = unshortener.unshorten(key)
                 print("\tshorten_url:\t" + key)
-                long_url = clean_url(long_url)
+                uri = clean_url(long_url)
 
                 # Add the URL into the database
-                url_db[key] = long_url
-                print("\tunshorten_url:\t" + long_url)
+                url_db[key] = uri
+                print("\tunshorten_url:\t" + uri)
                 print()
                 suporte.append(key)
             except ValueError:

@@ -57,33 +57,38 @@ def analise(link, resultado, df):
 	redex = re.compile("http")
 	filtro = re.compile("…")
 	df = pd.read_csv(df)
+	start_date = dt.date(2017, 1, 1)
+	# mask = (df['created_at'] >=start_date)
+	# df = df.loc[mask]gfy
 	print('df read')
 	#busca os urls no dataframe
 	for ind in df.index:
 		if ind%100000 == 0:
 			print(ind)
-		words = str(df['expanded_url'][ind])
+		sup = df['created_at'][ind]
+		dia = dt.date(int(sup[0:4]), int(sup[5:7]), int(sup[8:10]))
 		cit = True
+		if dia < start_date:
+			cit = False
+		words = str(df['expanded_url'][ind])
 		while cit:
-			#laço infinito!!!!!!
 			suporte = redex.search(words)
 			if suporte == None:
 				cit = False
 				break
-			sup = suporte.span()
-			amostra =  words[sup[0]:]
+			ap = suporte.span()
+			amostra =  words[ap[0]:]
 			amostra = amostra.split()
-			url = amostra[0].split(sep=',')[0]
+			url = amostra[0].split(sep='|')[0]
 			words = redex.sub("", words, 1)
 			if filtro.search(url) != None:
 				continue
 
 			#Faz a analise da data do url
-			sup = df['user_created_at'][ind]
-			dia = dt.date(int(sup[0:4]), int(sup[5:7]), int(sup[8:10]))
 			url = link.get(url)
 			today = resultado.get(url)
 			if today == None:
+				print('erro')
 				continue
 			if (today[0] - ref).days > (dia - ref).days:
 				resultado[url][0] = dia
@@ -91,12 +96,21 @@ def analise(link, resultado, df):
 				resultado[url][1] = dia
 	return resultado
 
+def limpeza(dicti, ref):
+	lista = []
+	for key, values in dicti.items():
+		if values[1] == ref:
+			lista.append(key)
+	for item in lista:
+		dicti.pop(item)
+	return dicti
+
 def escrita(resultado, outputfile, ref):
 	with codecs.open(outputfile + '_urlstime.csv', 'w', encoding='utf8') as arquivo:
-		arquivo.write('"link","first","duration","last"')
+		arquivo.write('"link";"first";"duration";"last"\n')
 		for key, values in resultado.items():
 			duration = (values[1] - values[0]).days
-			arquivo.write(f'{str(key)},{str(values[0])},{str(duration)},{str(values[1])}\n')
+			arquivo.write(f'"{str(key)}";{str(values[0])};{str(duration)};{str(values[1])}\n')
 		arquivo.close()
 	
 	print('First over')
@@ -117,10 +131,10 @@ def escrita(resultado, outputfile, ref):
 	print('Second start')
 
 	with codecs.open(outputfile + '_domainstime.csv', 'w', encoding='utf8') as arquivo:
-		arquivo.write('"domain","first","duration","last"\n')
+		arquivo.write('"domain";"first";"duration";"last"\n')
 		for key, value in domains.items():
 			duration = (value[1] - value[0]).days
-			arquivo.write(f'{str(key)},{str(value[0])},{str(duration)},{str(value[1])}\n')
+			arquivo.write(f'{str(key)};{str(value[0])};{str(duration)};{str(value[1])}\n')
 		arquivo.close()
 
 
@@ -143,5 +157,6 @@ for key, values in links.items():
 df = result.get("dataframe")
 print('Start')
 resultado = analise(links, resultado, df)
+resultado = limpeza(resultado, ref)
 print("Writing")
 escrita(resultado, outputfile, ref)

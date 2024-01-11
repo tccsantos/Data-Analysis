@@ -10,20 +10,21 @@ from argparse import RawTextHelpFormatter
 
 def	readOptions():
 
-	status = False
+    status = False
 
-	parser = argparse.ArgumentParser(description = "Basic Usage",formatter_class=RawTextHelpFormatter)
-	parser.add_argument("-i"	,	"--input"		, help = "CSV input File"		, required = True	, default = "")
-	argument = parser.parse_args()
+    parser = argparse.ArgumentParser(description = "Basic Usage",formatter_class=RawTextHelpFormatter)
+    parser.add_argument("-i"	,	"--input"		, help = "CSV input File"		, required = True	, default = "")
+    parser.add_argument("-o"	,	"--output"		, help = "CSV input File"		, required = True	, default = "")
+    argument = parser.parse_args()
 
-	if argument.input:
-		status = True
+    if argument.input and argument.output:
+        status = True
 
-	if not status:
-		print("Maybe you want to use -h for help")
-		status = False 
+    if not status:
+        print("Maybe you want to use -h for help")
+        status = False 
 
-	return {"success":status, "input":argument.input}
+    return {"success":status, "input":argument.input, "output":argument.output}
 
 def contagem(lista):
     c = Counter(lista)
@@ -48,15 +49,20 @@ def analise(data, redex):
             row = redex.sub('', row, 1)
     return resultado
 
-def escrita(output, data):
-    with codecs.open(output[:-4] + 'hashtags.csv', 'w', encoding='utf8') as arquivo:
+def escrita(name, output, data):
+    with codecs.open(name + '/' + output[-16:-4] + 'hashtags.csv', 'w', encoding='utf8') as arquivo:
+        suporte = None
+        arquivo.write(f'"Hashtag";"Score"\n')
         for tup in data:
-             arquivo.write(f'{str(tup[0])},{str(tup[1])}\n')
+             arquivo.write(f'{str(tup[0])};{str(tup[1])}\n')
+             suporte = tup
+        if suporte: print(suporte[0])
         arquivo.close()
 
 
 result = readOptions()
 inputfile	=	result.get("input")
+outputfile = result.get("output")
 
 arquivos = inputfile + '/*.csv'
 #print(arquivo)
@@ -65,4 +71,4 @@ redex = re.compile('#')
 for arquivo in arquivos:
     reps = analise(arquivo, redex)
     reps = contagem(reps)
-    escrita(arquivo, reps)
+    escrita(outputfile, arquivo, reps)

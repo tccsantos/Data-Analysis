@@ -11,17 +11,26 @@ def escrita(outputfile, top):
     with codecs.open(outputfile + "_URL.csv", 'w', encoding='utf-8') as arquivo:
         for a in range(len(top)):
             suporte = top[a]
-            arquivo.write(f'{str(suporte)}\n')
+            arquivo.write(f'"{str(suporte)}"\n')
         arquivo.close()
 
+# def contagem(lista):
+#     c = Counter(lista)
+#     sup = c.most_common()
+#     suporte = []
+#     for row in sup:
+#         suporte.append(row[0])
+#     return suporte
 
 def busca(inputfile):
     df = pd.read_csv(inputfile)
     redex = re.compile("http")
     urllist = []
+    #448-450
     for ind in df.index:
         text = str(df["expanded_url"][ind])
         cit = True
+        #print(text)
         while cit:
             suporte = redex.search(text)
             if suporte == None:
@@ -30,9 +39,12 @@ def busca(inputfile):
             sup = suporte.span()
             amostra =  text[sup[0]:]
             amostra = amostra.split()
-            url = amostra[0].split( sep=',')
-            urllist.append(url[0])
+            url = amostra[0].split( sep='|')
+            for link in url:
+                urllist.append(link)
+            #print(text)
             text = redex.sub("", text, 1)
+            #print(text)
     return urllist
 
 
@@ -67,4 +79,5 @@ if not result.get("success"):
 outputfile = result.get("output")
 inputfile = result.get("input")
 urllist = busca(inputfile)
+#urllist = contagem(urllist)
 escrita(outputfile, urllist)
