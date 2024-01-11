@@ -5,9 +5,15 @@ import datetime as dt
 import re
 from tld import get_tld
 import pickle
+from glob import glob
 
 from argparse import RawTextHelpFormatter
 
+
+def pasta(pasta):
+    arquivo = pasta + '/*.csv'
+    #print(arquivo)
+    return sorted(glob(arquivo))
 
 def get_domain(url):
     """
@@ -106,7 +112,7 @@ def limpeza(dicti, ref):
 	return dicti
 
 def escrita(resultado, outputfile, ref):
-	with codecs.open(outputfile + '_urlstime.csv', 'w', encoding='utf8') as arquivo:
+	with codecs.open(outputfile[:-9] + '_urlstime.csv', 'w', encoding='utf8') as arquivo:
 		arquivo.write('"link";"first";"duration";"last"\n')
 		for key, values in resultado.items():
 			duration = (values[1] - values[0]).days
@@ -130,7 +136,7 @@ def escrita(resultado, outputfile, ref):
 	resultado = None
 	print('Second start')
 
-	with codecs.open(outputfile + '_domainstime.csv', 'w', encoding='utf8') as arquivo:
+	with codecs.open(outputfile[:-9] + '_domainstime.csv', 'w', encoding='utf8') as arquivo:
 		arquivo.write('"domain";"first";"duration";"last"\n')
 		for key, value in domains.items():
 			duration = (value[1] - value[0]).days
@@ -153,10 +159,14 @@ ref = dt.date(2010, 1, 1)
 dia = dt.date(2022, 12, 31)
 for key, values in links.items():
 	resultado[values] = [dia, ref]
+backup = resultado
 
-df = result.get("dataframe")
+folder = pasta(result.get("dataframe"))
 print('Start')
-resultado = analise(links, resultado, df)
-resultado = limpeza(resultado, ref)
-print("Writing")
-escrita(resultado, outputfile, ref)
+for data in folder:
+	print(data[:-8])
+	resultado = analise(links, resultado, data)
+	resultado = limpeza(resultado, ref)
+	print("Writing")
+	escrita(resultado, data, ref)
+	resultado = backup

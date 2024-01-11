@@ -4,8 +4,15 @@ import sys
 import codecs
 import re
 
+#from glob import glob
 from argparse import RawTextHelpFormatter
 #from collections import Counter
+
+
+# def pasta(pasta):
+#     arquivo = pasta + '/*.csv'
+#     #print(arquivo)
+#     return sorted(glob(arquivo))
 
 def escrita(outputfile, top):
     with codecs.open(outputfile + "_URL.csv", 'w', encoding='utf-8') as arquivo:
