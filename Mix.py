@@ -1,14 +1,17 @@
-import pandas as pd
 import codecs
 import argparse
-import datetime as dt
-import re
-
+import sys
 
 from argparse import RawTextHelpFormatter
 from csv import reader
+from glob import glob
 
 
+
+def pasta(pasta):
+    arquivo = pasta + '/*.csv'
+    #print(arquivo)
+    return sorted(glob(arquivo))
 
 def	readOptions():
 
@@ -85,7 +88,8 @@ def analise(time, score):
             print(key)
             i += 1
             if i > 10000:
-                break
+                print('failure')
+                sys.exit(0)
     
     return resultado
 
@@ -104,17 +108,21 @@ def escrita(resultado, outputfile):
             
 def main():
     result = readOptions()
+    if not result.get("success"):
+         print(result.get("success"))
+         sys.exit(0)
     timefile	=	result.get("time")
     outputfile	=	result.get("output")
     scorefile = result.get("score")
-
+    # folder = pasta(timefile)
+    # for timefile in folder:
     print('Reading')
     time, score = read(timefile, scorefile)
     print('Start')
     resultado = analise(time, score)
     print('Writing')
     escrita(resultado, outputfile)
-
+ 
 
 if __name__ == "__main__":
     main()

@@ -4,6 +4,7 @@ import argparse
 import re
 from glob import glob
 from collections import Counter
+import re
 
 from argparse import RawTextHelpFormatter
 
@@ -36,6 +37,7 @@ def analise(data, redex):
         #next(csv_reader, None)
         arquivo = list(csv_reader)
     resultado = []
+    total = 0
     for row in arquivo:
         row = str(row)
         row = row[2:-2]
@@ -45,19 +47,20 @@ def analise(data, redex):
                 break
             suporte = suporte.span()
             suporte = row[suporte[0]:].split()
-            resultado.append(suporte[0])
+            resultado.append(suporte[0].lower())
+            total += 1
             row = redex.sub('', row, 1)
-    return resultado
+    return resultado, total
 
-def escrita(name, output, data):
-    with codecs.open(name + '/' + output[-16:-4] + 'hashtags.csv', 'w', encoding='utf8') as arquivo:
-        suporte = None
-        arquivo.write(f'"Hashtag";"Score"\n')
+def escrita(output, data, total):
+    with codecs.open(output + 'hashtags.csv', 'w', encoding='utf8') as arquivo:
+        arquivo.write(f'"Hashtag";"Score";"Proportion"\n')
+        limpagem = re.compile(r"[\W]")
         for tup in data:
-             arquivo.write(f'{str(tup[0])};{str(tup[1])}\n')
-             suporte = tup
-        if suporte: print(suporte[0])
+             if not limpagem.search(str(tup[0][1:])):
+                arquivo.write(f'{str(tup[0])};{str(tup[1])};{str("{:.3f}%".format(tup[1]/total*100))}\n')
         arquivo.close()
+        print('end')
 
 
 result = readOptions()
@@ -69,6 +72,6 @@ arquivos = inputfile + '/*.csv'
 arquivos = sorted(glob(arquivos))
 redex = re.compile('#')
 for arquivo in arquivos:
-    reps = analise(arquivo, redex)
+    reps, total = analise(arquivo, redex)
     reps = contagem(reps)
-    escrita(outputfile, arquivo, reps)
+    escrita(arquivo[:-9], reps, total)

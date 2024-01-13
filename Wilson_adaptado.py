@@ -206,19 +206,19 @@ def get_domain(url):
     return {}
 
 
-def main():
+def main(inputfile, outputfile, attempts):
     """
     	Main function
     """
 
-    result = read_options()
+    # result = read_options()
 
-    if not result.get("success"):
-        sys.exit(1)
+    # if not result.get("success"):
+    #     sys.exit(1)
 
-    inputfile = result.get("input")
-    outputfile = result.get("output")
-    attempts = result.get("error")
+    # inputfile = result.get("input")
+    # outputfile = result.get("output")
+    # attempts = result.get("error")
 
     with open(inputfile, "r",encoding="utf-8") as read_obj:
         csv_reader = reader(read_obj, delimiter=';')
@@ -313,8 +313,8 @@ def main():
             url_error.pop(i)
 
     #save the database dictionary
-    with open('./Dados/urlDict.pickle', 'wb') as file:
-        pickle.dump(url_db, file)
+    # with open('./Dados/urlDict.pickle', 'wb') as file:
+    #     pickle.dump(url_db, file)
     
     # group and save the URLs
     my_dict = collections.Counter(url)

@@ -159,7 +159,9 @@ ref = dt.date(2010, 1, 1)
 dia = dt.date(2022, 12, 31)
 for key, values in links.items():
 	resultado[values] = [dia, ref]
-backup = resultado
+backup = {}
+for key, values in resultado.items():
+	backup[key] = values
 
 folder = pasta(result.get("dataframe"))
 print('Start')
@@ -169,4 +171,5 @@ for data in folder:
 	resultado = limpeza(resultado, ref)
 	print("Writing")
 	escrita(resultado, data, ref)
-	resultado = backup
+	for key, values in backup.items():
+		resultado[key] = values
