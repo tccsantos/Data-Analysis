@@ -4,14 +4,15 @@ import sys
 
 from argparse import RawTextHelpFormatter
 from csv import reader
-from glob import glob
+# from glob import glob
 
 
 
-def pasta(pasta):
-    arquivo = pasta + '/*.csv'
-    #print(arquivo)
-    return sorted(glob(arquivo))
+# def pasta(pasta):
+#     arquivo = pasta + '/*.csv'
+#     #print(arquivo)
+#     return sorted(glob(arquivo))
+
 
 def	readOptions():
 
@@ -32,6 +33,7 @@ def	readOptions():
 		status = False 
 
 	return {"success":status, "output":argument.output, "time":argument.input, "score":argument.input2}
+
 
 def read(timefile, scorefile):
     """
@@ -66,6 +68,7 @@ def read(timefile, scorefile):
     
     return time, score
 
+
 def analise(time, score):
     """
     Mix their contents in a single list, containing
@@ -78,20 +81,26 @@ def analise(time, score):
     """
     resultado = []
     i = 0
-    for key, values in time.items():
-        apoio = score.get(key)
+    failure = False
+    for key, values in score.items():
+        apoio = time.get(key)
         if apoio:
-            suporte = [key, values[0], values[1], values[2], apoio]
+            suporte = [key, apoio[0], apoio[1], apoio[2], values]
             resultado.append(suporte)
         else:
             print('erro')
             print(key)
             i += 1
-            if i > 10000:
-                print('failure')
-                sys.exit(0)
+            if not failure:
+                if i > 10000:
+                    failure = True
     
-    return resultado
+    if failure:
+        print(i)
+        sys.exit(0)
+    else:
+        return resultado
+
 
 def escrita(resultado, outputfile):
     """
@@ -105,7 +114,8 @@ def escrita(resultado, outputfile):
         for row in resultado:
             arquivo.write(f'"{str(row[0])}",{str(row[1])},{str(row[2])},{str(row[3])},{str(row[4])}\n')
         arquivo.close()
-            
+
+
 def main():
     result = readOptions()
     if not result.get("success"):
@@ -123,6 +133,7 @@ def main():
     print('Writing')
     escrita(resultado, outputfile)
  
+
 
 if __name__ == "__main__":
     main()

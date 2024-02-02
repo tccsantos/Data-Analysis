@@ -4,15 +4,18 @@ import sys
 import codecs
 import re
 
-#from glob import glob
+
+from glob import glob
 from argparse import RawTextHelpFormatter
 #from collections import Counter
 
 
-# def pasta(pasta):
-#     arquivo = pasta + '/*.csv'
-#     #print(arquivo)
-#     return sorted(glob(arquivo))
+
+def pasta(pasta):
+    arquivo = pasta + '/*.csv'
+    #print(arquivo)
+    return sorted(glob(arquivo))
+
 
 def escrita(outputfile, top):
     with codecs.open(outputfile + "_URL.csv", 'w', encoding='utf-8') as arquivo:
@@ -20,6 +23,7 @@ def escrita(outputfile, top):
             suporte = top[a]
             arquivo.write(f'"{str(suporte)}"\n')
         arquivo.close()
+
 
 # def contagem(lista):
 #     c = Counter(lista)
@@ -29,8 +33,9 @@ def escrita(outputfile, top):
 #         suporte.append(row[0])
 #     return suporte
 
+
 def busca(inputfile):
-    df = pd.read_csv(inputfile)
+    df = pd.read_csv(inputfile, sep=';')
     redex = re.compile("http")
     urllist = []
     #448-450
@@ -80,11 +85,22 @@ def read_options():
     return {"success": status, "input": argument.input, "output": argument.output}
 
 
-result = read_options()
-if not result.get("success"):
-    sys.exit(1)
-outputfile = result.get("output")
-inputfile = result.get("input")
-urllist = busca(inputfile)
-#urllist = contagem(urllist)
-escrita(outputfile, urllist)
+def main():
+    result = read_options()
+    if not result.get("success"):
+        sys.exit(1)
+    outputfile = result.get("output")
+    inputfile = result.get("input")
+    folder = pasta(inputfile)
+    #folder = ['./Dados/Anti_bottext.csv']
+    for inputfile in folder:
+        print(inputfile)
+        urllist = busca(inputfile)
+        nome = inputfile[24:-12]
+        #nome = 'Anti'
+        #urllist = contagem(urllist)
+        escrita(outputfile +'/' + nome, urllist)
+
+
+if __name__ == '__main__':
+    main()

@@ -1,12 +1,14 @@
-import pandas as pd
+#import pandas as pd
 import codecs
-from csv import reader
 import argparse
 import re
 import itertools
-from glob import glob
 
+
+from glob import glob
+from csv import reader
 from argparse import RawTextHelpFormatter
+
 
 
 def	readOptions():
@@ -26,6 +28,7 @@ def	readOptions():
 		status = False 
 
 	return {"success":status, "output":argument.output, "input":argument.input}
+
 
 def analise(data):
     redex = re.compile("RT")
@@ -101,6 +104,7 @@ def analise(data):
         resultado[i] = ap.sub("", resultado[i])
     return [resultado, resultadoh]
 
+
 def escrita(content, outputfile):
     data = content[0]
     for i in range(len(data)):
@@ -109,7 +113,7 @@ def escrita(content, outputfile):
     data = list(data for data,_ in itertools.groupby(data))
     #print(data)
     
-    with codecs.open(outputfile + 'processed.csv', 'w', encoding='utf8') as arquivo:
+    with codecs.open(outputfile + '_processed.csv', 'w', encoding='utf8') as arquivo:
         for row in data:
             #print(row + '\n\n')
             for i in range(len(row)):
@@ -118,34 +122,36 @@ def escrita(content, outputfile):
                         arquivo.write(f'"{str(row[i:])}"\n')
                     break
         arquivo.close()
+
     
-    # with codecs.open(outputfile + 'hashtags.csv', 'w', encoding='utf8') as arquivo:
-    #     for rows in content[1]:
-    #         for row in rows:
-    #             arquivo.write(f'{str(row)}\n')
-    #     arquivo.close()
-    
+def main():
+    result = readOptions()
+    inputfile	=	result.get("input")
+    #outputfile	=	result.get("output")
 
-result = readOptions()
-inputfile	=	result.get("input")
-outputfile	=	result.get("output")
+    print('Start')
 
-print('Start')
+    arquivo = inputfile + '/*.csv'
+    arquivo = sorted(glob(arquivo))
+    i = 0
+    #print(arquivo)
+    for input in arquivo:
+        with open(input, "r",encoding="utf-8") as read_obj:
+                csv_reader = reader(read_obj, delimiter=';')
+                #next(csv_reader, None)
+                data = list(csv_reader)
 
-# arquivo = inputfile + '/*.csv'
-# arquivo = sorted(glob(arquivo))
-# i = 0
-# #print(arquivo)
-# for input in arquivo:
-with open(inputfile, "r",encoding="utf-8") as read_obj:
-        csv_reader = reader(read_obj, delimiter=';')
-        #next(csv_reader, None)
-        data = list(csv_reader)
+        outputfile = input[:-4]
 
-print("Data read")
+        print("Data read")
 
-resultado = analise(data)
+        resultado = analise(data)
 
-print('Writing')
+        print('Writing')
 
-escrita(resultado, outputfile)
+        escrita(resultado, outputfile)
+
+
+
+if __name__ == '__main__':
+    main()

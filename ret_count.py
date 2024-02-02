@@ -2,10 +2,13 @@ import pandas as pd
 import argparse
 import sys
 import codecs
-import re
+#import re
+
 
 from argparse import RawTextHelpFormatter
-from collections import Counter
+#from collections import Counter
+
+
 
 def read_options():
     status = False
@@ -17,39 +20,60 @@ def read_options():
         "-i", "--input", help="CSV input File", required=True, default=""
     )
 
+    parser.add_argument(
+        "-o", "--output", help="CSV output File", required=True, default=""
+    )
+
     argument = parser.parse_args()
 
-    if argument.input:
+    if argument.input and argument.output:
         status = True
 
     if not status:
         print("Maybe you want to use -h for help")
         status = False
 
-    return {"success": status, "input": argument.input}
+    return {"success": status, "input": argument.input, "output": argument.output}
 
 
-def analise(ind, df):
-    print(df['username'][ind])
-    print(df['text'][ind])
-    print(df['retweet_count'][ind])
+def dicts(df):
+    nomes = {}
+    for ind in df.index:
+        sup = nomes.get(df['username'][ind])
+        if sup == None:
+            nomes[df['username'][ind]] = 0
+    return nomes
 
 
-def likes(input):
-    df = pd.read_csv(input)
-    nomes = ['HildaDeSouzaMa1', 'xandevolp', 'josetomazfilho', 'getuliosantana', 'LeiaRachor', 'Doriko8', 'BetoFontes', 'tonytattoo', 'BR100PTRALHAS', 'Irlandaemel']
-    for nome in nomes:
-        most = 0
-        big = -1
-        for ind in df.index:
-            if df['username'][ind] == nome:
-                if int(df['retweet_count'][ind]) > most:
-                    most = int(df['retweet_count'][ind])
-                    big = ind
-        analise(big, df)
-    return
+def ret(df):
+    nomes = dicts(df)
+    resultado = dicts(df)
+    for ind in df.index:
+        if nomes.get(df['username'][ind]) < df['retweet_count'][ind]:
+            resultado[df['username'][ind]] = ind
+            nomes[df['username'][ind]] = df['retweet_count'][ind]
+    return resultado, nomes
 
-result = read_options()
-if not result.get("success"):
-    sys.exit(1)
-likes(result.get("input"))
+
+def escrita(outputfile, result, nomes, df):
+    with codecs.open(outputfile, 'w', encoding= 'utf8') as arquivo:
+        arquivo.write('"username";"retweet_count";"text"\n')
+        for key, values in result.items():
+            sup = nomes.get(key)
+            apoio = df['text'][values]
+            arquivo.write(f'{str(key)};{str(sup)};{str(apoio)}\n')
+        arquivo.close()
+
+
+def main():
+    result = read_options()
+    if not result.get("success"):
+        sys.exit(1)
+    df = pd.read_csv(result.get("input"), sep=';')
+    resultado, nomes = ret(df)
+    escrita(result.get("output"), resultado, nomes, df)
+
+
+
+if __name__ == '__main__':
+    main()

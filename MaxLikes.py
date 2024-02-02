@@ -47,22 +47,26 @@ def dictio(namefile):
     names = {}
     for ind in df.index:
         if names.get(df['username'][ind]) == None:
-            names[df['username'][ind]] = 0
+            names[df['username'][ind]] = [0, 0]
     return names
 
 
-def likes(df, names):
+def maxlike(df, names):
     for ind in df.index:
-        if names.get(df['username'][ind]) != None:
-            names[df['username'][ind]] += df['like_count'][ind]
+        sup = names.get(df['username'][ind])
+        if sup != None:
+            if sup[0] < df['like_count'][ind]:
+                names[df['username'][ind]][0] = df['like_count'][ind]
+                names[df['username'][ind]][1] = ind
     return names
 
 
-def escrita(resultado, outputfile):
-    with codecs.open(outputfile + '_likes.csv', 'w', encoding='utf8') as arquivo:
-        arquivo.write('"Name";"Number of likes"\n')
+def escrita(df, resultado, outputfile):
+    with codecs.open(outputfile + '_MaxLikes.csv', 'w', encoding='utf8') as arquivo:
+        arquivo.write('"Name";"Number of likes";"text"\n')
         for key, values in resultado.items():
-            arquivo.write(f'{str(key)};{str(values)}\n')
+            sup = df['text'][values[1]]
+            arquivo.write(f'{str(key)};{str(values[0])};"{str(sup)}"\n')
         arquivo.close()
 
 
@@ -75,14 +79,14 @@ def main():
     outputfile = result.get('output')
     namefile = result.get('names')
     folder = pasta(namefile)
-    #folder = [namefile]
+    folder = [namefile]
     for namefile in folder:
         nome = namefile[24:-12]
-        #nome = 'Anti'
+        nome = 'Anti'
         print(nome)
         names = dictio(namefile)
-        resultado = likes(df, names)
-        escrita(resultado, outputfile + '/' + nome)
+        resultado = maxlike(df, names)
+        escrita(df, resultado, outputfile + '/' + nome)
 
 
 

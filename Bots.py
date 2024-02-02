@@ -49,26 +49,30 @@ def read(input):
 
 
 def post_recente(df, ref):
-    wordlist = []
-    helper = []
-    ajuda = []
+    wordlist = {}
+    #helper = []
+    #ajuda = []
+    size = len(df.index)
+    count = 0
     for ind in df.index:
+        count += 1
+        if not count%10000:
+            p	=	(1.*count/size)*100	
+            print("\t"+str(round(p,2))+" % finished")
         try:
             sup = df['created_at'][ind]
             dia = dt.date(int(sup[0:4]), int(sup[5:7]), int(sup[8:10]))
             delta = dia - ref
             delta = delta.days
             nome = df['username'][ind]
-            if nome not in helper:
-                ajuda = [nome, delta]
-                wordlist.append(ajuda)
-                helper.append(nome)
+            sup = wordlist.get(nome)
+            if sup:
+                if delta < sup:
+                    wordlist[nome] = delta
+                # ajuda = [nome, delta]
+                # wordlist.append(ajuda)
             else:
-                for i in range(len(wordlist)):
-                    if wordlist[i][0] == nome:
-                        if delta < wordlist[i][1]:
-                            wordlist[i][1] = delta
-                        break
+                wordlist[nome] = delta
         except Exception as e:
             print(e)
             pass
@@ -78,12 +82,18 @@ def post_recente(df, ref):
 
 def idade(df, ref):
     wordlist = []
-    helper = []
+    helper = {}
+    size = len(df.index)
+    count = 0
     for ind in df.index:
+        count += 1
+        if not count%10000:
+            p	=	(1.*count/size)*100	
+            print("\t"+str(round(p,2))+" % finished")
         try:
             nome = df['username'][ind]
-            if nome not in helper:
-                helper.append(nome)
+            if not helper.get(nome):
+                helper[nome] = True
                 sup = df['user_created_at'][ind]
                 dia = dt.date(int(sup[0:4]), int(sup[5:7]), int(sup[8:10]))
                 delta = dia - ref
@@ -99,14 +109,21 @@ def idade(df, ref):
 def mix(post, idade):
     definitivo = []
     if len(post) == len(idade):
-        for a in range(len(post)):
+        size = len(idade)
+        count = 0
+        for a in range(len(idade)):
+            count += 1
+            if not count%10000:
+                p	=	(1.*count/size)*100	
+                print("\t"+str(round(p,2))+" % finished")
             apoio = []
-            if post[a][0] != idade[a][1]:
+            sup = post.get(idade[a][1])
+            if not sup:
                 print("Names does not match")
                 sys.exit(1)
-            phase = post[a][1] - idade[a][0]
+            phase = sup - idade[a][0]
             apoio.append(phase)
-            apoio.append(post[a][0])
+            apoio.append(idade[a][1])
             definitivo.append(apoio)
         definitivo.sort()
         return definitivo
@@ -118,9 +135,15 @@ def mix(post, idade):
 
 def busca(df, avalia):
     suporte = []
+    size = len(df.index)
+    count = 0
     for ind in df.index:
+        count += 1
+        if not count%10000:
+            p	=	(1.*count/size)*100	
+            print("\t"+str(round(p,2))+" % finished")
         nome = df["username"][ind]
-        if nome in avalia:
+        if avalia.get(nome):
             suporte.append(nome)
     c = Counter(suporte)
     return c.most_common()
@@ -129,13 +152,22 @@ def busca(df, avalia):
 def junction(mix, amount):
     suporte = []
     if len(mix) == len(amount):
-        for ind in range(len(mix)):
-            nome = mix[ind][1]
-            for ind2 in range(len(amount)):
-                if nome == amount[ind2][0]:
-                    ajuda = [amount[ind2][1], mix[ind][0], nome]
-                    suporte.append(ajuda)
-                    break
+        size = len(amount)
+        count = 0
+        for ind in range(len(amount)):
+            count += 1
+            if not count%10000:
+                p	=	(1.*count/size)*100	
+                print("\t"+str(round(p,2))+" % finished")
+            nome = amount[ind][0]
+            sup = mix.get(nome)
+            if sup != None:
+                ajuda = [amount[ind][1], sup, nome]
+                suporte.append(ajuda)
+            else:
+                print('Name not Found')
+                print(nome)
+                sys.exit(1)
         return suporte
     else:
         print("Error")
@@ -151,21 +183,34 @@ def escrita(data, name):
         arquivo.close()
 
 
-
-result = read_options()
-if not result.get("success"):
-    sys.exit(1)
-folder = pasta(result.get("input"))
-for input in folder:
+def main():
+    result = read_options()
+    if not result.get("success"):
+        sys.exit(1)
+    # folder = pasta(result.get("input"))
+    # for input in folder:
+    input = result.get("input")
     df = read(input)
     ref = dt.date(2010, 1, 1)
+    print('Starting')
     wordlist = post_recente(df, ref)
+    print("part 1 complete")
     wordlist2 = idade(df, ref)
+    print('part 2 complete')
     bots = mix(wordlist, wordlist2)
-    avalia = []
+    print('part 3 complete')
+    avalia = {}
+    processed = {}
     for ind in range(len(bots)):
-        avalia.append(bots[ind][1])
+        avalia[bots[ind][1]] = True
+        processed[bots[ind][1]] = bots[ind][0]
     amount = busca(df, avalia)
-    conclusion = junction(bots, amount)
+    print('part 4 complete')
+    conclusion = junction(processed, amount)
+    print('start writing')
     conclusion.sort(reverse = True)
     escrita(conclusion, input[:-9])
+
+
+if __name__ == '__main__':
+    main()

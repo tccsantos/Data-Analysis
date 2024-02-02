@@ -1,12 +1,13 @@
 import codecs
-from csv import reader
 import argparse
 import re
-from glob import glob
-from collections import Counter
-import re
 
+
+from glob import glob
+from csv import reader
+from collections import Counter
 from argparse import RawTextHelpFormatter
+
 
 
 def	readOptions():
@@ -27,9 +28,17 @@ def	readOptions():
 
     return {"success":status, "input":argument.input, "output":argument.output}
 
+
+def pasta(pasta):
+    arquivo = pasta + '/*.csv'
+    #print(arquivo)
+    return sorted(glob(arquivo))
+
+
 def contagem(lista):
     c = Counter(lista)
     return c.most_common()
+
 
 def analise(data, redex):
     with open(data, "r",encoding="utf-8") as read_obj:
@@ -52,8 +61,9 @@ def analise(data, redex):
             row = redex.sub('', row, 1)
     return resultado, total
 
+
 def escrita(output, data, total):
-    with codecs.open(output + 'hashtags.csv', 'w', encoding='utf8') as arquivo:
+    with codecs.open(output + '_hashtags.csv', 'w', encoding='utf8') as arquivo:
         arquivo.write(f'"Hashtag";"Score";"Proportion"\n')
         limpagem = re.compile(r"[\W]")
         for tup in data:
@@ -63,15 +73,19 @@ def escrita(output, data, total):
         print('end')
 
 
-result = readOptions()
-inputfile	=	result.get("input")
-outputfile = result.get("output")
+def main():
+    result = readOptions()
+    inputfile	=	result.get("input")
+    outputfile = result.get("output")
+    arquivos = pasta(inputfile)
+    redex = re.compile('#')
+    for arquivo in arquivos:
+        reps, total = analise(arquivo, redex)
+        reps = contagem(reps)
+        print(arquivo[24:-12])
+        escrita(outputfile + '/' + arquivo[24:-12], reps, total)
 
-arquivos = inputfile + '/*.csv'
-#print(arquivo)
-arquivos = sorted(glob(arquivos))
-redex = re.compile('#')
-for arquivo in arquivos:
-    reps, total = analise(arquivo, redex)
-    reps = contagem(reps)
-    escrita(arquivo[:-9], reps, total)
+
+
+if __name__ == '__main__':
+    main()

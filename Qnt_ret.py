@@ -51,16 +51,16 @@ def dictio(namefile):
     return names
 
 
-def likes(df, names):
+def ret(df, names):
     for ind in df.index:
         if names.get(df['username'][ind]) != None:
-            names[df['username'][ind]] += df['like_count'][ind]
+            names[df['username'][ind]] += df['retweet_count'][ind]
     return names
 
 
 def escrita(resultado, outputfile):
-    with codecs.open(outputfile + '_likes.csv', 'w', encoding='utf8') as arquivo:
-        arquivo.write('"Name";"Number of likes"\n')
+    with codecs.open(outputfile + '_retweetados.csv', 'w', encoding='utf8') as arquivo:
+        arquivo.write('"Name";"Number of retweets"\n')
         for key, values in resultado.items():
             arquivo.write(f'{str(key)};{str(values)}\n')
         arquivo.close()
@@ -75,13 +75,11 @@ def main():
     outputfile = result.get('output')
     namefile = result.get('names')
     folder = pasta(namefile)
-    #folder = [namefile]
     for namefile in folder:
         nome = namefile[24:-12]
-        #nome = 'Anti'
         print(nome)
         names = dictio(namefile)
-        resultado = likes(df, names)
+        resultado = ret(df, names)
         escrita(resultado, outputfile + '/' + nome)
 
 

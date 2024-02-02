@@ -1,11 +1,12 @@
-import codecs
 import pandas as pd
+import re
 import argparse
 import sys
-
+import codecs
 
 from argparse import RawTextHelpFormatter
 from glob import glob
+
 
 
 def read_options():
@@ -42,26 +43,33 @@ def pasta(pasta):
     return sorted(glob(arquivo))
 
 
-def dictio(namefile):
-    df = pd.read_csv(namefile, sep=';')
-    names = {}
+def cita(df, nomes):
+    redex = re.compile('@')
     for ind in df.index:
-        if names.get(df['username'][ind]) == None:
-            names[df['username'][ind]] = 0
-    return names
+        sup = str(df['mentions'][ind])
+        tags = sup.split()
+        for tag in tags:
+            tag = redex.sub('', tag)
+            sup = nomes.get(tag)
+            if sup != None:
+                nomes[tag] += 1
+    return nomes
 
 
-def likes(df, names):
+def dictio(file):
+    df = pd.read_csv(file, sep=';')
+    nomes = {}
     for ind in df.index:
-        if names.get(df['username'][ind]) != None:
-            names[df['username'][ind]] += df['like_count'][ind]
-    return names
+        sup = df['username'][ind]
+        if nomes.get(sup) == None:
+            nomes[sup] = 0
+    return nomes
 
 
-def escrita(resultado, outputfile):
-    with codecs.open(outputfile + '_likes.csv', 'w', encoding='utf8') as arquivo:
-        arquivo.write('"Name";"Number of likes"\n')
-        for key, values in resultado.items():
+def escrita(number, outputfile):
+    with codecs.open(outputfile + '_citados.csv', 'w', encoding='utf8') as arquivo:
+        arquivo.write('"Name";"Number of citations"\n')
+        for key, values in number.items():
             arquivo.write(f'{str(key)};{str(values)}\n')
         arquivo.close()
 
@@ -69,20 +77,18 @@ def escrita(resultado, outputfile):
 def main():
     result = read_options()
     if not result.get('success'):
-        print('missing data')
+        print('Missing data')
         sys.exit(0)
-    df = pd.read_csv(result.get('input'))
+    inputfile = result.get('input')
+    df = pd.read_csv(inputfile)
     outputfile = result.get('output')
-    namefile = result.get('names')
-    folder = pasta(namefile)
-    #folder = [namefile]
+    folder = pasta(result.get('names'))
     for namefile in folder:
         nome = namefile[24:-12]
-        #nome = 'Anti'
         print(nome)
         names = dictio(namefile)
-        resultado = likes(df, names)
-        escrita(resultado, outputfile + '/' + nome)
+        number = cita(df, names)
+        escrita(number, outputfile + '/' + nome)
 
 
 
