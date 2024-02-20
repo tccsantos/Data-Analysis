@@ -61,7 +61,7 @@ def escrita(outputfile, result, nomes, df):
         for key, values in result.items():
             sup = nomes.get(key)
             apoio = df['text'][values]
-            arquivo.write(f'{str(key)};{str(sup)};{str(apoio)}\n')
+            arquivo.write(f'{str(key)};{str(sup)};"{str(apoio)}"\n')
         arquivo.close()
 
 
