@@ -71,12 +71,14 @@ def main():
     if not result.get('success'):
         print('missing data')
         sys.exit(0)
-    df = pd.read_csv(result.get('input'))
+    df = pd.read_csv(result.get('input'), sep=';')
     outputfile = result.get('output')
     namefile = result.get('names')
     folder = pasta(namefile)
+    folder = [namefile]
     for namefile in folder:
         nome = namefile[24:-12]
+        nome = 'qnt'
         print(nome)
         names = dictio(namefile)
         resultado = ret(df, names)

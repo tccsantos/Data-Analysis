@@ -33,13 +33,13 @@ def read_options():
     return {"success": status, "input": argument.input}
 
 
-def pasta(pasta):
+def pasta(pasta: str) -> list[str]:
     arquivo = pasta + '/*.csv'
     #print(arquivo)
     return sorted(glob(arquivo))
 
 
-def read(input):
+def read(input: str) -> pd.DataFrame:
     try:
         df = pd.read_csv(input)
         return df.sort_values('username')
@@ -48,7 +48,7 @@ def read(input):
         sys.exit(1)
 
 
-def post_recente(df, ref):
+def post_recente(df: pd.DataFrame, ref: dt.date) -> dict:
     wordlist = {}
     #helper = []
     #ajuda = []
@@ -80,7 +80,7 @@ def post_recente(df, ref):
     return wordlist
 
 
-def idade(df, ref):
+def idade(df: pd.DataFrame, ref: dt.date) -> list[list[int, str]]:
     wordlist = []
     helper = {}
     size = len(df.index)
@@ -91,7 +91,7 @@ def idade(df, ref):
             p	=	(1.*count/size)*100	
             print("\t"+str(round(p,2))+" % finished")
         try:
-            nome = df['username'][ind]
+            nome = str(df['username'][ind])
             if not helper.get(nome):
                 helper[nome] = True
                 sup = df['user_created_at'][ind]
@@ -106,12 +106,11 @@ def idade(df, ref):
     return wordlist
 
 
-def mix(post, idade):
+def mix(post: dict, idade: list) -> list[list[int, str]]:
     definitivo = []
-    if len(post) == len(idade):
-        size = len(idade)
+    if (size := len(post)) == len(idade):
         count = 0
-        for a in range(len(idade)):
+        for a in range(size):
             count += 1
             if not count%10000:
                 p	=	(1.*count/size)*100	
@@ -122,7 +121,7 @@ def mix(post, idade):
                 print("Names does not match")
                 sys.exit(1)
             phase = sup - idade[a][0]
-            apoio.append(phase)
+            apoio.append(int(phase))
             apoio.append(idade[a][1])
             definitivo.append(apoio)
         definitivo.sort()
@@ -133,7 +132,7 @@ def mix(post, idade):
         sys.exit(1)
     
 
-def busca(df, avalia):
+def busca(df: pd.DataFrame, avalia: dict) -> list[tuple[str, int]]:
     suporte = []
     size = len(df.index)
     count = 0
@@ -149,7 +148,7 @@ def busca(df, avalia):
     return c.most_common()
 
 
-def junction(mix, amount):
+def junction(mix: dict, amount: list) -> list[tuple[int, int, str]]:
     suporte = []
     if len(mix) == len(amount):
         size = len(amount)
@@ -162,7 +161,7 @@ def junction(mix, amount):
             nome = amount[ind][0]
             sup = mix.get(nome)
             if sup != None:
-                ajuda = [amount[ind][1], sup, nome]
+                ajuda = (amount[ind][1], sup, nome)
                 suporte.append(ajuda)
             else:
                 print('Name not Found')
@@ -175,7 +174,7 @@ def junction(mix, amount):
         sys.exit(1)
 
 
-def escrita(data, name):
+def escrita(data: list[str], name: str) -> None:
     with codecs.open(name + "_bots.csv", 'w', encoding='utf-8') as arquivo:
         arquivo.write('"Name";"Posts";"Age"\n')
         for info in data:
@@ -183,7 +182,7 @@ def escrita(data, name):
         arquivo.close()
 
 
-def main():
+def main() -> None:
     result = read_options()
     if not result.get("success"):
         sys.exit(1)

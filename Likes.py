@@ -8,7 +8,7 @@ from argparse import RawTextHelpFormatter
 from glob import glob
 
 
-def read_options():
+def read_options() -> dict:
     status = False
 
     parser = argparse.ArgumentParser(
@@ -36,13 +36,13 @@ def read_options():
     return {"success": status, "input": argument.input, "output": argument.output, "names": argument.names}
 
 
-def pasta(pasta):
+def pasta(pasta: str) -> list[str]:
     arquivo = pasta + '/*.csv'
     #print(arquivo)
     return sorted(glob(arquivo))
 
 
-def dictio(namefile):
+def dictio(namefile: str) -> dict:
     df = pd.read_csv(namefile, sep=';')
     names = {}
     for ind in df.index:
@@ -51,14 +51,14 @@ def dictio(namefile):
     return names
 
 
-def likes(df, names):
+def likes(df: pd.DataFrame, names: dict) -> dict:
     for ind in df.index:
         if names.get(df['username'][ind]) != None:
             names[df['username'][ind]] += df['like_count'][ind]
     return names
 
 
-def escrita(resultado, outputfile):
+def escrita(resultado: dict, outputfile: str) -> None:
     with codecs.open(outputfile + '_likes.csv', 'w', encoding='utf8') as arquivo:
         arquivo.write('"Name";"Number of likes"\n')
         for key, values in resultado.items():
@@ -66,19 +66,19 @@ def escrita(resultado, outputfile):
         arquivo.close()
 
 
-def main():
+def main() -> None:
     result = read_options()
     if not result.get('success'):
         print('missing data')
         sys.exit(0)
-    df = pd.read_csv(result.get('input'))
+    df = pd.read_csv(result.get('input'), sep=';')
     outputfile = result.get('output')
     namefile = result.get('names')
     folder = pasta(namefile)
-    #folder = [namefile]
+    folder = [namefile]
     for namefile in folder:
         nome = namefile[24:-12]
-        #nome = 'Anti'
+        nome = 'cib'
         print(nome)
         names = dictio(namefile)
         resultado = likes(df, names)
