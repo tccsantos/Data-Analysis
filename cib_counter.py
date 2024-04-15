@@ -57,10 +57,14 @@ def analise(df: pd.DataFrame, cib: dict) -> dict:
     return cib
 
 
-def escrita(df: pd.DataFrame, cib: dict) -> None:
+def escrita(df: pd.DataFrame, cib: dict, name: str) -> None:
     # df2 = pd.DataFrame(cib)
-    df['cib_count'] = cib
-    print(df.head())
+    apoio = []
+    for ind in df.index:
+        apoio.append(cib.get(str(df['cib'][ind])))
+    df['cib_count'] = apoio
+    df.to_csv(name[:-4] + '_count_cib.csv',index=False, sep=';')
+    return
 
 
 if __name__ == '__main__':
@@ -70,4 +74,4 @@ if __name__ == '__main__':
     df = read(result.get("input"))
     cib = dictio(df)
     cib = analise(df, cib)
-    escrita(df, cib)
+    escrita(df, cib, result.get("input"))

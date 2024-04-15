@@ -11,7 +11,7 @@ from argparse import RawTextHelpFormatter
 
 
 
-def read_options():
+def read_options() -> dict[str]:
     status = False
 
     parser = argparse.ArgumentParser(
@@ -190,7 +190,7 @@ def main() -> None:
     # for input in folder:
     input = result.get("input")
     df = read(input)
-    ref = dt.date(2010, 1, 1)
+    ref = dt.date(2021, 12, 31)
     print('Starting')
     wordlist = post_recente(df, ref)
     print("part 1 complete")
