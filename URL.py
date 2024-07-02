@@ -36,27 +36,16 @@ def escrita(outputfile, top):
 
 def busca(inputfile):
     df = pd.read_csv(inputfile, sep=';')
-    redex = re.compile("http")
     urllist = []
     #448-450
     for ind in df.index:
-        text = str(df["expanded_url"][ind])
-        cit = True
-        #print(text)
-        while cit:
-            suporte = redex.search(text)
-            if suporte == None:
-                cit = False
-                break
-            sup = suporte.span()
-            amostra =  text[sup[0]:]
-            amostra = amostra.split()
-            url = amostra[0].split( sep='|')
-            for link in url:
-                urllist.append(link)
-            #print(text)
-            text = redex.sub("", text, 1)
-            #print(text)
+        text: str = df["expanded_url"][ind]
+        try:
+            sup = text.split('|')
+            for url in sup:
+                urllist.append(url)
+        except AttributeError:
+            continue
     return urllist
 
 
@@ -91,15 +80,16 @@ def main():
         sys.exit(1)
     outputfile = result.get("output")
     inputfile = result.get("input")
-    folder = pasta(inputfile)
-    #folder = ['./Dados/Anti_bottext.csv']
+    #folder = pasta(inputfile)
+    folder = [inputfile]
     for inputfile in folder:
         print(inputfile)
         urllist = busca(inputfile)
-        nome = inputfile[24:-12]
+        #nome = inputfile[24:-12]
+        #nome = 'cib'
         #nome = 'Anti'
         #urllist = contagem(urllist)
-        escrita(outputfile +'/' + nome, urllist)
+        escrita(outputfile, urllist)
 
 
 if __name__ == '__main__':

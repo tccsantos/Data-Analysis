@@ -206,19 +206,19 @@ def get_domain(url):
     return {}
 
 
-def main(inputfile, outputfile, attempts):
+def main():
     """
     	Main function
     """
 
-    # result = read_options()
+    result = read_options()
 
-    # if not result.get("success"):
-    #     sys.exit(1)
+    if not result.get("success"):
+        sys.exit(1)
 
-    # inputfile = result.get("input")
-    # outputfile = result.get("output")
-    # attempts = result.get("error")
+    inputfile = result.get("input")
+    outputfile = result.get("output")
+    attempts = int(result.get("error"))
 
     with open(inputfile, "r",encoding="utf-8") as read_obj:
         csv_reader = reader(read_obj, delimiter=';')
@@ -234,7 +234,22 @@ def main(inputfile, outputfile, attempts):
     domains = {}
 
     unshortener = UnshortenIt(default_timeout=30, default_headers={})
+
+    count	=	0
+    size	=	len(data)
+    ava = round(size/10)
+    if ava > 1000: ava = 1000
+    if ava < 1: ava = 1
+
     for row in data:
+
+        if not count%ava:
+            p	=	(1.*count/size)*100	
+            print("\t"+str(round(p,2))+" % finished")	
+        count	=	count	+	1
+
+
+
         try:
             uri = row[0]
         except IndexError:
@@ -246,15 +261,15 @@ def main(inputfile, outputfile, attempts):
             # Check if the URL exists in the database
             if uri in url_db:
                 uri = url_db.get(uri)
-                print("\tshorten_url:\t" + origin)
-                print("\tunshorten_url:\t" + uri)
-                print()
+                # print("\tshorten_url:\t" + origin)
+                # print("\tunshorten_url:\t" + uri)
+                # print()
             #check if the url exists in the error database 
             elif uri in url_error:
                 uri = url_error.get(uri)
-                print("\tshorten_url:\t" + origin)
-                print("\tunshorten_url:\t" + uri)
-                print()
+                # print("\tshorten_url:\t" + origin)
+                # print("\tunshorten_url:\t" + uri)
+                # print()
             else:
                 try:
                     # Unshorten the url
@@ -270,7 +285,7 @@ def main(inputfile, outputfile, attempts):
                     print(uri)
                 except Exception as error:
                     url_error[origin] = origin
-                    print(error)
+                    #print(error)
         else:
             uri = clean_url(uri)
             url_db[origin] = uri
@@ -287,10 +302,28 @@ def main(inputfile, outputfile, attempts):
 
     #retry the url that were unshortened
     print('retrying errors\n')
+
+
     for i in range(attempts):
+
+        count	=	0
+        size	=	len(url_error)
+        ava = round(size/10)
+        if ava > 1000: ava = 1000
+        if ava < 1: ava = 1
+
+
         print('attempt' + str(i + 1) + '\n')
         suporte = []
-        for key, value in url_error.items():
+
+        for key in url_error.keys():
+
+            if not count%ava:
+                p	=	(1.*count/size)*100	
+                print("\t"+str(round(p,2))+" % finished")	
+            count	=	count	+	1
+
+
             try:
                 # Unshorten the url
                 long_url = unshortener.unshorten(key)
@@ -313,8 +346,8 @@ def main(inputfile, outputfile, attempts):
             url_error.pop(i)
 
     #save the database dictionary
-    # with open('./Dados/urlDict.pickle', 'wb') as file:
-    #     pickle.dump(url_db, file)
+    with open('./Dados/Pickle/05_06_24.pickle', 'wb') as file:
+        pickle.dump(url_db, file)
     
     # group and save the URLs
     my_dict = collections.Counter(url)
