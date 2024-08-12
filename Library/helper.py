@@ -5,6 +5,7 @@ import pandas as pd
 from csv import reader
 from glob import glob
 from collections import Counter
+from typing import Any
 
 
 
@@ -12,7 +13,7 @@ class grafo:
 
     def __init__(self, weightnode = False, weightedge = False) -> None:
         self.nodes: set = set()
-        self.edges: dict[any, set] = dict()
+        self.edges: dict[Any, set] = dict()
         self.weightnode: bool = weightnode
         self.weightedge: bool = weightedge
 
@@ -75,12 +76,12 @@ class helper:
         return sorted(glob(arquivo))
     
 
-    def contagem(lista: list[any]) -> list[tuple[any, int]]:
+    def contagem(lista: list[Any]) -> list[tuple[Any, int]]:
         c = Counter(lista)
         return c.most_common()
     
 
-    def leitor_csv(nome: str, sep: str = ';') -> list[any]:
+    def leitor_csv(nome: str, sep: str = ';') -> list:
         with open(nome, 'r', encoding= 'utf8') as arquivo:
             readable = reader(arquivo, delimiter=sep)
             next(readable, None)
